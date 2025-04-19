@@ -65,10 +65,15 @@ function transpose(reels) {
 }
 
 function displayRows(rows) {
-    const slotOutput = document.getElementById("slot-output");
-    slotOutput.innerHTML = "";
-    for (const row of rows) {
-        slotOutput.innerHTML += `<div>${row.join(" | ")}</div>`;
+    for (let i = 0; i < 3; i++) {
+        const reel = document.getElementById(`reel-${i + 1}`);
+        reel.classList.add("spinning");
+        reel.innerText = "⏳";
+
+        setTimeout(() => {
+            reel.classList.remove("spinning");
+            reel.innerText = rows[0][i] + "\n" + rows[1][i] + "\n" + rows[2][i];
+        }, 500);
     }
 }
 
@@ -99,25 +104,27 @@ function play() {
     }
 
     balance -= bet * lines;
+    updateBalance();
 
     const reels = spin();
     const rows = transpose(reels);
     displayRows(rows);
 
-    const winnings = getWinnings(rows, bet, lines);
-    balance += winnings;
+    setTimeout(() => {
+        const winnings = getWinnings(rows, bet, lines);
+        balance += winnings;
+        updateBalance();
 
-    updateBalance();
+        if (winnings > 0) {
+            showMessage(`You won $${winnings.toFixed(2)}!`);
+        } else {
+            showMessage("No win this time. Try again!");
+        }
 
-    if (winnings > 0) {
-        showMessage(`You won $${winnings.toFixed(2)}!`);
-    } else {
-        showMessage("No win this time. Try again!");
-    }
-
-    if (balance <= 0) {
-        showMessage("You ran out of money. Reload to play again.");
-    }
+        if (balance <= 0) {
+            showMessage("You ran out of money. Reload to play again.");
+        }
+    }, 600); // After spin ends
 }
 
 function showMessage(msg) {
